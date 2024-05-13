@@ -44,12 +44,12 @@ namespace AuthService.Controllers
 
         // Other action methods remain unchanged
 
-        [HttpPost("logout")]
-        public async Task<IActionResult> Logout()
-        {
-            await _userService.SignOutAsync();
-            return Ok(new { Message = "Logout successful" });
-        }
+        //[HttpPost("logout")]
+        //public async Task<IActionResult> Logout()
+        //{
+        //    await _userService.SignOutAsync();
+        //    return Ok(new { Message = "Logout successful" });
+        //}
     }
 }
 
