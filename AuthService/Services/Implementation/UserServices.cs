@@ -30,7 +30,7 @@ namespace AuthService.Services.Implementation
 
         public async Task<SignInResult> LoginAsync(LoginDto model)
         {
-            return await _signInManager.PasswordSignInAsync(model.Email, model.Password, lockoutOnFailure: false);
+            return await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
         }
 
         public async Task<UserDto> GetUserByEmailAsync(string email)
