@@ -1,5 +1,5 @@
 using AuthService.Data;
-using AuthService.Data.Model;
+using AuthService.Data.UserDatas.Model;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

@@ -1,4 +1,4 @@
-﻿namespace AuthService.Data.DTOs
+﻿namespace AuthService.Data.UserDatas.DTOs
 {
     public class UserDto
     {
