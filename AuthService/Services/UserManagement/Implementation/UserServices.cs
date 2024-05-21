@@ -1,9 +1,9 @@
-﻿using AuthService.Data.DTOs;
-using AuthService.Data.Model;
-using AuthService.Services.Interface;
+﻿using AuthService.Data.UserDatas.DTOs;
+using AuthService.Data.UserDatas.Model;
+using AuthService.Services.UserManagement.Interface;
 using Microsoft.AspNetCore.Identity;
 
-namespace AuthService.Services.Implementation
+namespace AuthService.Services.UserManagement.Implementation
 {
     public class UserService : IUserService
     {

@@ -1,10 +1,10 @@
-﻿using AuthService.Data.DTOs;
-using AuthService.Data.Model;
+﻿using AuthService.Data.UserDatas.Model;
+using AuthService.Data.UserDatas.DTOs;
 using Microsoft.AspNetCore.Identity;
 using System.Threading.Tasks;
 
 
-namespace AuthService.Services.Interface
+namespace AuthService.Services.UserManagement.Interface
 {
     public interface IUserService
     {
