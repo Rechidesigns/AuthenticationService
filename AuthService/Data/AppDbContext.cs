@@ -4,8 +4,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AuthService.Data
 {
-    public class AppDbContext(DbContextOptions options) : IdentityDbContext<ApplicationUser>(options)
+    public class AppDbContext : IdentityDbContext<ApplicationUser>
     {
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
+
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
+        public DbSet<PersistedLogin> PersistedLogins { get; set; }
     }
+
 }
