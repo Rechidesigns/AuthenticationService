@@ -95,59 +95,6 @@ namespace AuthService.Services.UserManagement.Implementation
         }
 
 
-        // Example of a custom method in your repository or service
-        //public async Task<ApplicationUser> GetUsersByEmailAsync(string email)
-        //{
-        //    return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
-        //}
-
-        //public async Task<Result<LoginResponseDto>> Login(LoginDto model)
-        //{
-        //    try
-        //    {
-        //        // Normalize the email address
-        //        var normalizedEmail = model.Email.ToLowerInvariant();
-
-        //        _logger.LogInformation("Attempting to find user by normalized email: {NormalizedEmail}", normalizedEmail);
-
-        //        ApplicationUser existingUser = await _userService.GetUsersByEmailAsync(normalizedEmail);
-        //        if (existingUser == null)
-        //        {
-        //            _logger.LogWarning("User with email '{NormalizedEmail}' not found.", normalizedEmail);
-        //            return Result<LoginResponseDto>.Failure($"User with email '{model.Email}' not found.");
-        //        }
-
-        //        // Validate password
-        //        var loginResult = await _signInManager.PasswordSignInAsync(existingUser, model.Password, true, false);
-        //        if (!loginResult.Succeeded)
-        //        {
-        //            _logger.LogWarning("Invalid password for user with email '{NormalizedEmail}'.", normalizedEmail);
-        //            return Result<LoginResponseDto>.Failure(ErrorMessages.Invalid_User_Password);
-        //        }
-
-        //        // Generate refresh token and create response
-        //        var userRefreshToken = await PersistRefreshToken(existingUser, GenerateRefreshToken());
-        //        var response = new LoginResponseDto
-        //        {
-        //            Token = await GenerateToken(existingUser),
-        //            UserId = existingUser.Id,
-        //            FullName = $"{existingUser.FirstName} {existingUser.LastName}",
-        //            Email = existingUser.Email,
-        //            RefreshToken = userRefreshToken.RefreshToken,
-        //            RefreshTokenExpiryTime = userRefreshToken.RefreshTokenExpiryTime,
-        //        };
-
-        //        return Result<LoginResponseDto>.Success(response);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError(ex, "An error occurred during the login process.");
-        //        return Result<LoginResponseDto>.Failure($"An error occurred during the login process: {ex.Message}");
-        //    }
-        //}
-
-
-
         private async Task<PersistedLogin> PersistRefreshToken(ApplicationUser user, string refreshToken)
         {
             var userRefreshToken = await _context.PersistedLogins.FirstOrDefaultAsync(c => c.UserId == new Guid(user.Id));
