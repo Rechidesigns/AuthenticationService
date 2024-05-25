@@ -13,6 +13,7 @@ namespace AuthService.Services.UserManagement.Interface
         Task<UserDto> GetUserByEmailAsync(string email);
         Task<Result<LoginResponseDto>> Login(LoginDto model);
         Task<Result<LoginResponseDto>> RefreshToken(RefreshTokenNewRequestModel tokenModel);
+        //Task<ApplicationUser> GetUsersByEmailAsync(string email);
 
     }
 }

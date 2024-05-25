@@ -10,7 +10,5 @@ namespace AuthService.Data.UserDatas.DTOs
 
         [Required(ErrorMessage = "Password is required")]
         public string Password { get; set; }
-
-        public bool RememberMe { get; set; } = false;
     }
 }
