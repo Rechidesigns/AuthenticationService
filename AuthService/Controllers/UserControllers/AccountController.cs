@@ -24,12 +24,29 @@ namespace AuthService.Controllers.UserControllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto model)
         {
-            var result = await _userService.RegisterAsync(model);
-            if (result.Succeeded)
+            if (!ModelState.IsValid)
             {
-                return Ok(new { Message = "User created successfully" });
+                return BadRequest(ModelState);
             }
-            return BadRequest(new { Error = "Failed to create user", result.Errors });
+
+            var response = await _userService.RegisterAsync(model);
+
+            if (response.Success)
+            {
+                return Ok(new
+                {
+                    response.Success,
+                    response.Message,
+                    User = response.UserDetails
+                });
+            }
+
+            return BadRequest(new
+            {
+                response.Success,
+                response.Message,
+                Errors = response.IdentityResult.Errors
+            });
         }
 
         [HttpPost]

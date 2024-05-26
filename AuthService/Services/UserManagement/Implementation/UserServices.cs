@@ -41,17 +41,87 @@ namespace AuthService.Services.UserManagement.Implementation
            // _userService = userService;
         }
 
-        public async Task<IdentityResult> RegisterAsync(RegisterDto model)
+        public async Task<RegisterResponse> RegisterAsync(RegisterDto model)
         {
-            var user = new ApplicationUser
+            try
             {
-                FirstName = model.FirstName,
-                LastName = model.LastName,
-                Email = model.Email,
-                IsSeller = model.IsSeller,
-                UserName = model.Email // Set UserName to Email
-            };
-            return await _userManager.CreateAsync(user, model.Password);
+                if (model == null)
+                {
+                    throw new ArgumentNullException(nameof(model));
+                }
+
+                _logger.LogInformation("Starting user registration process for email: {Email}", model.Email);
+
+                var emailExists = await _context.ApplicationUsers
+                    .Where(x => x.Email == model.Email)
+                    .FirstOrDefaultAsync();
+
+                if (emailExists != null)
+                {
+                    _logger.LogWarning("Email {Email} already exists.", model.Email);
+                    return new RegisterResponse
+                    {
+                        Success = false,
+                        Message = "Email already exists."
+                    };
+                }
+
+                var user = new ApplicationUser
+                {
+                    FirstName = model.FirstName,
+                    LastName = model.LastName,
+                    Email = model.Email,
+                    IsSeller = model.IsSeller,
+                    UserName = model.Email // Set UserName to Email
+                };
+
+                var result = await _userManager.CreateAsync(user, model.Password);
+
+                if (result.Succeeded)
+                {
+                    _logger.LogInformation("User {Email} registered successfully.", user.Email);
+
+                    var userDetails = new UserDetails
+                    {
+                        Id = user.Id,
+                        FirstName = user.FirstName,
+                        LastName = user.LastName,
+                        Email = user.Email
+                    };
+
+                    return new RegisterResponse
+                    {
+                        Success = true,
+                        Message = "User registered successfully.",
+                        IdentityResult = result,
+                        UserDetails = userDetails
+                    };
+                }
+                else
+                {
+                    var errorMessage = result.Errors.Any(e => e.Code == "DuplicateUserName")
+                        ? "Username is already taken."
+                        : string.Join("; ", result.Errors.Select(e => e.Description));
+
+                    _logger.LogWarning("User registration failed for email {Email}: {Errors}", model.Email, errorMessage);
+
+                    return new RegisterResponse
+                    {
+                        Success = false,
+                        Message = errorMessage,
+                        IdentityResult = result
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred during user registration.");
+                return new RegisterResponse
+                {
+                    Success = false,
+                    Message = $"Error registering user: {ex.Message}"
+                };
+            }
         }
 
 
