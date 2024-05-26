@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  yourproject:
+    image: yourproject
+    build:
+      context: .
+      dockerfile: YourProject/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=DESKTOP-URRGOIT;Database=AuthenticationDb;Trusted_Connection=True;TrustServerCertificate=True
+      - JwtConfig__TokenLifeTime=30
+      - JwtConfig__ValidIssuer=https://localhost:7202
+      - JwtConfig__ValidAudience=https://localhost:7202
+      - JwtConfig__SecretKey=YcxjOMewdFfeZFQm5iGAYxTjR23Z93rLbyZucty3
+      - JwtConfig__RefreshTokenValidityinDays=43200
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+
+  db:
+    image: mcr.microsoft.com/mssql/server
+    environment:
+      SA_PASSWORD: "Your_password123"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"

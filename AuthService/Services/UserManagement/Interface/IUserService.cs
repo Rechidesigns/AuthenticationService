@@ -9,12 +9,13 @@ namespace AuthService.Services.UserManagement.Interface
 {
     public interface IUserService
     {
-        Task<IdentityResult> RegisterAsync(RegisterDto model);
+        //Task<IdentityResult> RegisterAsync(RegisterDto model);
+        Task<RegisterResponse> RegisterAsync(RegisterDto model);
+
         Task<UserDto> GetUserByEmailAsync(string email);
         Task<Result<LoginResponseDto>> Login(LoginDto model);
         Task<Result<LoginResponseDto>> RefreshToken(RefreshTokenNewRequestModel tokenModel);
-        //Task<ApplicationUser> GetUsersByEmailAsync(string email);
-
+        //Task<string> RegisterUserAsync(RegisterDto userRegistration, string role);
     }
 }
 
