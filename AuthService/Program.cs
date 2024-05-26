@@ -6,6 +6,7 @@ using AuthService.Services.UserManagement.Implementation;
 using AuthService.Services.UserManagement.Interface;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,6 +21,9 @@ builder.Services.AddControllers();
 
 // Register IUserService with its implementation UserService
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IMailSender, MailSender>();
+builder.Services.AddScoped<IEmailService, EmailClientService>();
+
 
 // Register JwtConfig
 var jwtConfig = builder.Configuration.GetSection("JwtConfig").Get<JwtConfig>();

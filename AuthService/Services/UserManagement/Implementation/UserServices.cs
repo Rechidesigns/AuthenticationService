@@ -1,9 +1,12 @@
 ﻿using AuthService.Data;
+using AuthService.Data.Auth;
+using AuthService.Data.EmailModel;
 using AuthService.Data.UserDatas.DTOs;
 using AuthService.Data.UserDatas.Model;
 using AuthService.Helpers;
 using AuthService.Services.UserManagement.Interface;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -22,6 +25,7 @@ namespace AuthService.Services.UserManagement.Implementation
         private readonly AppDbContext _context;
         private readonly JwtConfig _jwtConfig;
         private readonly ILogger<UserService> _logger;
+        private readonly IMailSender _mailSender;
 
 
         public UserService(
@@ -30,7 +34,8 @@ namespace AuthService.Services.UserManagement.Implementation
             IConfiguration configuration,
             JwtConfig jwtConfig,
             AppDbContext context,
-            ILogger<UserService> logger)
+            ILogger<UserService> logger,
+            IMailSender mailSender)
         {
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             _signInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
@@ -38,7 +43,8 @@ namespace AuthService.Services.UserManagement.Implementation
             _jwtConfig = jwtConfig ?? throw new ArgumentNullException(nameof(jwtConfig));
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _logger = logger ?? throw new ArgumentNullException();
-           // _userService = userService;
+            _mailSender = mailSender;
+            // _userService = userService;
         }
 
         public async Task<RegisterResponse> RegisterAsync(RegisterDto model)
@@ -135,14 +141,14 @@ namespace AuthService.Services.UserManagement.Implementation
                 if (existingUser == null)
                 {
                     _logger.LogWarning("User with email '{Email}' not found.", model.Email);
-                    return Result<LoginResponseDto>.Failure($"User with email '{model.Email}' not found.");
+                    return Result<LoginResponseDto>.Failure("Invalid email or password.");
                 }
 
-                SignInResult loginResult = await _signInManager.PasswordSignInAsync(existingUser, model.Password, true, false);
+                SignInResult loginResult = await _signInManager.PasswordSignInAsync(existingUser, model.Password, isPersistent: true, lockoutOnFailure: false);
                 if (!loginResult.Succeeded)
                 {
                     _logger.LogWarning("Invalid password for user with email '{Email}'.", model.Email);
-                    return Result<LoginResponseDto>.Failure(ErrorMessages.Invalid_User_Password);
+                    return Result<LoginResponseDto>.Failure("Invalid email or password.");
                 }
 
                 var userRefreshToken = await PersistRefreshToken(existingUser, GenerateRefreshToken());
@@ -163,6 +169,7 @@ namespace AuthService.Services.UserManagement.Implementation
                 return Result<LoginResponseDto>.Failure($"An error occurred during the login process: {ex.Message}");
             }
         }
+
 
 
         private async Task<PersistedLogin> PersistRefreshToken(ApplicationUser user, string refreshToken)
@@ -333,6 +340,40 @@ namespace AuthService.Services.UserManagement.Implementation
                 };
             }
             return null;
+        }
+
+
+        public async Task<string> ChangePassword(string email, ChangePassword model)
+        {
+            try
+            {
+                ApplicationUser user = await _userManager.FindByEmailAsync(email);
+                if (user == null) return "User doesn't exist";
+
+                if (!await _userManager.CheckPasswordAsync(user, model.OldPassword))
+                    return "Old password is incorrect";
+
+                var result = await _userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
+
+                if (!result.Succeeded)
+                {
+                    string errors = string.Join(" ", result.Errors.Select(e => e.Description));
+                    return errors;
+                }
+                var emailModel = new EmailMessageModel
+                {
+                    Email = email,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName
+                };
+
+                await _mailSender.ChangePassword(emailModel);
+                return "User password successfully changed";
+            }
+            catch (Exception ex)
+            {
+                return $"An error occurred: {ex.Message}";
+            }
         }
     }
 }

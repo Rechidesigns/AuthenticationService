@@ -3,6 +3,7 @@ using AuthService.Data.UserDatas.DTOs;
 using Microsoft.AspNetCore.Identity;
 using System.Threading.Tasks;
 using AuthService.Helpers;
+using AuthService.Data.Auth;
 
 
 namespace AuthService.Services.UserManagement.Interface
@@ -16,6 +17,7 @@ namespace AuthService.Services.UserManagement.Interface
         Task<Result<LoginResponseDto>> Login(LoginDto model);
         Task<Result<LoginResponseDto>> RefreshToken(RefreshTokenNewRequestModel tokenModel);
         //Task<string> RegisterUserAsync(RegisterDto userRegistration, string role);
+        Task<string> ChangePassword(string email, ChangePassword model);
     }
 }
 
