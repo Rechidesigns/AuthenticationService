@@ -15,6 +15,7 @@ namespace AuthService.Data
         public DbSet<VerificationModel> Verifications { get; set; }
         public DbSet<SentEmailOtp> SentEmailOtps { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
+        public DbSet<Seller> Sellers { get; set; }
 
 
 
