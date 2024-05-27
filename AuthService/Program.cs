@@ -33,12 +33,25 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "AuthService", Version = "1.0" });
+    c.UseAllOfToExtendReferenceSchemas();
+    c.UseAllOfForInheritance();
+    c.UseOneOfForPolymorphism();
+    c.SelectDiscriminatorNameUsing(type =>
+    {
+        return type.Name switch
+        {
+            nameof(ApplicationUser) => "Usertype",
+            _ => null
+        };
+
+
+    });
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
     {
         Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
         Name = "Authorization",
         In = ParameterLocation.Header,
-        Type = SecuritySchemeType.Http,
+        Type = SecuritySchemeType.ApiKey,
         Scheme = "Bearer"
     });
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -52,9 +65,11 @@ builder.Services.AddSwaggerGen(c =>
                     Id = "Bearer"
                 }
             },
-            new string[] {}
+            new List<string>()
         }
     });
+    c.SchemaFilter<EnumSchemaFilter>();
+    c.UseInlineDefinitionsForEnums();
 });
 
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -74,9 +89,11 @@ builder.Services.AddAuthentication(options =>
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(options =>
 {
+    options.MapInboundClaims = true;
+    //var key = System.Text.Encoding.UTF8.GetBytes(builder.Configuration["JwtConfig:SecretKey"]);
     options.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuer = true,
+        ValidateIssuer = false,
         ValidateAudience = true,
         ValidateIssuerSigningKey = true,
         ValidateLifetime = true,
