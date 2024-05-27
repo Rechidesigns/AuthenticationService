@@ -215,7 +215,9 @@ namespace AuthService.Services.UserManagement.Implementation
             new Claim(ClaimTypes.NameIdentifier, user.Id),
             new Claim(ClaimTypes.Email, user.Email),
             new Claim(ClaimTypes.Name, user.UserName),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new Claim(JwtRegisteredClaimNames.Iss, _jwtConfig.ValidIssuer),
+            new Claim(JwtRegisteredClaimNames.Aud, _jwtConfig.ValidAudience)
         };
 
                 IList<string> userRoles = await _userManager.GetRolesAsync(user);
@@ -230,7 +232,9 @@ namespace AuthService.Services.UserManagement.Implementation
                 {
                     Subject = new ClaimsIdentity(claims),
                     Expires = DateTime.UtcNow.AddHours(24),
-                    SigningCredentials = new SigningCredentials(symmetricSecurityKey, SecurityAlgorithms.HmacSha256Signature)
+                    SigningCredentials = new SigningCredentials(symmetricSecurityKey, SecurityAlgorithms.HmacSha256Signature),
+                    Issuer = _jwtConfig.ValidIssuer,
+                    Audience = _jwtConfig.ValidAudience
                 };
 
                 JwtSecurityTokenHandler tokenHandler = new();
@@ -243,6 +247,7 @@ namespace AuthService.Services.UserManagement.Implementation
                 throw new InvalidOperationException($"Error generating token: {ex.Message}", ex);
             }
         }
+
 
 
         public async Task<Result<LoginResponseDto>> RefreshToken(RefreshTokenNewRequestModel tokenModel)
@@ -375,5 +380,47 @@ namespace AuthService.Services.UserManagement.Implementation
                 return $"An error occurred: {ex.Message}";
             }
         }
+
+        public async Task<Result<LogoutRequestDto>> Logout(string accessToken)
+        {
+            try
+            {
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var token = tokenHandler.ReadJwtToken(accessToken);
+
+                // Extract the user ID from the 'nameid' claim
+                var userIdClaim = token.Claims.FirstOrDefault(claim => claim.Type == JwtRegisteredClaimNames.NameId);
+                if (userIdClaim == null)
+                {
+                    _logger.LogWarning("The token does not contain a 'nameid' claim.");
+                    return Result<LogoutRequestDto>.Failure("Invalid token: 'nameid' claim is missing.");
+                }
+
+                var userId = userIdClaim.Value;
+                var user = await _context.Users.FindAsync(userId);
+
+                if (user == null)
+                {
+                    _logger.LogWarning("User not found for user ID: {UserId}", userId);
+                    return Result<LogoutRequestDto>.Failure("Invalid token or user not found.");
+                }
+
+                var refreshToken = await _context.RefreshTokens.FirstOrDefaultAsync(rt => rt.Token == accessToken);
+                if (refreshToken != null)
+                {
+                    _context.RefreshTokens.Remove(refreshToken);
+                    await _context.SaveChangesAsync();
+                }
+
+                var logoutRequestDto = new LogoutRequestDto { AccessToken = accessToken };
+                return Result<LogoutRequestDto>.Success(logoutRequestDto, "Logout successful.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred during logout.");
+                return Result<LogoutRequestDto>.Failure("An error occurred during logout.");
+            }
+        }
+
     }
 }

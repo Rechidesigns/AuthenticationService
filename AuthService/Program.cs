@@ -24,7 +24,6 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IMailSender, MailSender>();
 builder.Services.AddScoped<IEmailService, EmailClientService>();
 
-
 // Register JwtConfig
 var jwtConfig = builder.Configuration.GetSection("JwtConfig").Get<JwtConfig>();
 builder.Services.AddSingleton(jwtConfig);
@@ -44,21 +43,27 @@ builder.Services.AddSwaggerGen(c =>
             nameof(ApplicationUser) => "Usertype",
             _ => null
         };
+
+
     });
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
     {
-        Description = "JWT Authorization header \"Authorization: Bearer {token}\"",
+        Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
         Name = "Authorization",
         In = ParameterLocation.Header,
-        Type = SecuritySchemeType.ApiKey
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
     });
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement{
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
         {
-            new OpenApiSecurityScheme{
-                Reference = new OpenApiReference{
-                    Id = "Bearer", // The name of the previously defined security scheme.
-                    Type = ReferenceType.SecurityScheme
-                },
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
             },
             new List<string>()
         }
@@ -84,9 +89,11 @@ builder.Services.AddAuthentication(options =>
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(options =>
 {
+    options.MapInboundClaims = true;
+    //var key = System.Text.Encoding.UTF8.GetBytes(builder.Configuration["JwtConfig:SecretKey"]);
     options.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuer = true,
+        ValidateIssuer = false,
         ValidateAudience = true,
         ValidateIssuerSigningKey = true,
         ValidateLifetime = true,
@@ -106,7 +113,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthentication(); // Ensure authentication middleware is added
 app.UseAuthorization();
 
@@ -119,21 +125,25 @@ app.Run();
 
 
 
+
+
+
+
 //using AuthService.Core.Enums;
-//using AuthService.Data;
+//using AuthService.Data;  // Ensure this namespace is correct for your AppDbContext
 //using AuthService.Data.UserDatas.Model;
 //using AuthService.Helpers;
 //using AuthService.Services.UserManagement.Implementation;
 //using AuthService.Services.UserManagement.Interface;
 //using Microsoft.AspNetCore.Authentication.JwtBearer;
 //using Microsoft.AspNetCore.Identity;
+//using Microsoft.AspNetCore.Identity.UI.Services;
 //using Microsoft.EntityFrameworkCore;
 //using Microsoft.Extensions.Configuration;
+//using Microsoft.Extensions.DependencyInjection;
 //using Microsoft.IdentityModel.Tokens;
 //using Microsoft.OpenApi.Models;
 //using System.Text;
-
-
 
 //var builder = WebApplication.CreateBuilder(args);
 
@@ -142,17 +152,17 @@ app.Run();
 
 //// Register IUserService with its implementation UserService
 //builder.Services.AddScoped<IUserService, UserService>();
+//builder.Services.AddScoped<IMailSender, MailSender>();
+//builder.Services.AddScoped<IEmailService, EmailClientService>();
 
-//builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
+
+//// Register JwtConfig
+//var jwtConfig = builder.Configuration.GetSection("JwtConfig").Get<JwtConfig>();
+//builder.Services.AddSingleton(jwtConfig);
 
 
 //// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 //builder.Services.AddEndpointsApiExplorer();
-//builder.Services.AddSwaggerGen();
-////builder.Services.ConfigureSwagger();
-
-
-
 //builder.Services.AddSwaggerGen(c =>
 //{
 //    c.SwaggerDoc("v1", new OpenApiInfo { Title = "AuthService", Version = "1.0" });
@@ -166,8 +176,6 @@ app.Run();
 //            nameof(ApplicationUser) => "Usertype",
 //            _ => null
 //        };
-
-
 //    });
 //    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
 //    {
@@ -177,19 +185,18 @@ app.Run();
 //        Type = SecuritySchemeType.ApiKey
 //    });
 //    c.AddSecurityRequirement(new OpenApiSecurityRequirement{
-//                    {
-//                        new OpenApiSecurityScheme{
-//                            Reference = new OpenApiReference{
-//                                Id = "Bearer", //The name of the previously defined security scheme.
-//                                Type = ReferenceType.SecurityScheme
-//                            },
-//                        },
-//                        new List<string>()
-//                    }
-//                });
+//        {
+//            new OpenApiSecurityScheme{
+//                Reference = new OpenApiReference{
+//                    Id = "Bearer", // The name of the previously defined security scheme.
+//                    Type = ReferenceType.SecurityScheme
+//                },
+//            },
+//            new List<string>()
+//        }
+//    });
 //    c.SchemaFilter<EnumSchemaFilter>();
 //    c.UseInlineDefinitionsForEnums();
-
 //});
 
 //builder.Services.AddDbContext<AppDbContext>(options =>
@@ -202,14 +209,8 @@ app.Run();
 //    .AddEntityFrameworkStores<AppDbContext>()
 //    .AddDefaultTokenProviders();
 
-
-//// Register JwtConfig
-//var jwtConfig = builder.Configuration.GetSection("JwtConfig").Get<JwtConfig>();
-//builder.Services.AddSingleton(jwtConfig);
-
-////JWT
+//// JWT 
 //builder.Services.AddAuthentication(options =>
-
 //{
 //    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
 //    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -221,12 +222,11 @@ app.Run();
 //        ValidateAudience = true,
 //        ValidateIssuerSigningKey = true,
 //        ValidateLifetime = true,
-//        ValidIssuer = builder.Configuration["JwtConfig:Issuer"],
-//        ValidAudience = builder.Configuration["JwtConfig:Audience"],
-//        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtConfig:Key"]!))
+//        ValidIssuer = jwtConfig.ValidIssuer,
+//        ValidAudience = jwtConfig.ValidAudience,
+//        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfig.SecretKey))
 //    };
 //});
-
 
 //var app = builder.Build();
 
@@ -239,8 +239,11 @@ app.Run();
 
 //app.UseHttpsRedirection();
 
+//app.UseAuthentication(); // Ensure authentication middleware is added
 //app.UseAuthorization();
 
 //app.MapControllers();
 
 //app.Run();
+
+
