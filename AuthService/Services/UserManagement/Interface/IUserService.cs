@@ -10,14 +10,14 @@ namespace AuthService.Services.UserManagement.Interface
 {
     public interface IUserService
     {
-        //Task<IdentityResult> RegisterAsync(RegisterDto model);
         Task<RegisterResponse> RegisterAsync(RegisterDto model);
-
         Task<UserDto> GetUserByEmailAsync(string email);
         Task<Result<LoginResponseDto>> Login(LoginDto model);
         Task<Result<LoginResponseDto>> RefreshToken(RefreshTokenNewRequestModel tokenModel);
-        //Task<string> RegisterUserAsync(RegisterDto userRegistration, string role);
         Task<string> ChangePassword(string email, ChangePassword model);
+        
+        Task<Result<LogoutRequestDto>>Logout(string AccessToken);
+
     }
 }
 

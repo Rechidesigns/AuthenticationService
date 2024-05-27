@@ -375,5 +375,37 @@ namespace AuthService.Services.UserManagement.Implementation
                 return $"An error occurred: {ex.Message}";
             }
         }
+
+        public async Task<Result<LogoutRequestDto>> Logout(string accessToken)
+        {
+            try
+            {
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var token = tokenHandler.ReadJwtToken(accessToken);
+
+                var userId = token.Claims.First(claim => claim.Type == "sub").Value;
+                var user = await _context.Users.FindAsync(userId);
+
+                if (user == null)
+                {
+                    return Result<LogoutRequestDto>.Failure("Invalid token or user not found.");
+                }
+
+                var refreshToken = await _context.RefreshTokens.FirstOrDefaultAsync(rt => rt.Token == accessToken);
+                if (refreshToken != null)
+                {
+                    _context.RefreshTokens.Remove(refreshToken);
+                    await _context.SaveChangesAsync();
+                }
+
+                var logoutRequestDto = new LogoutRequestDto { AccessToken = accessToken };
+                return Result<LogoutRequestDto>.Success(logoutRequestDto, "Logout successful.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred during logout.");
+                return Result<LogoutRequestDto>.Failure("An error occurred during logout.");
+            }
+        }
     }
 }

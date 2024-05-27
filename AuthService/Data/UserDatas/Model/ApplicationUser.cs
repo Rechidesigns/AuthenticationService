@@ -5,14 +5,17 @@ namespace AuthService.Data.UserDatas.Model
 {
     public class ApplicationUser : IdentityUser
     {
-     
+
         [MaxLength(100)]
         public required string FirstName { get; set; }
 
         [MaxLength(100)]
         public required string LastName { get; set; }
 
-        public bool IsSeller { get; set; }
+        public bool IsSeller { get; set; } = false;
+
+        public ICollection<RefreshToken> RefreshTokens { get; set; }
+
 
     }
 

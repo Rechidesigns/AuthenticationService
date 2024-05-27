@@ -7,6 +7,7 @@ using System.IdentityModel.Tokens.Jwt;
 using AuthService.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using AuthService.Data.Auth;
+using System.Security.Claims;
 
 namespace AuthService.Controllers.UserControllers
 {
@@ -107,8 +108,29 @@ namespace AuthService.Controllers.UserControllers
             });
         }
 
+        [HttpPost]
+        [Route("logout")]
+       // [AllowAnonymous]
+        [Authorize]
 
+        public async Task<IActionResult> Logout([FromBody] LogoutRequestDto logoutRequest)
+        {
+            if (string.IsNullOrEmpty(logoutRequest.AccessToken))
+            {
+                return BadRequest(new { succeeded = false, error = "Access token is required." });
+            }
+
+            var response = await _userService.Logout(logoutRequest.AccessToken);
+            if (!response.Succeeded)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
     }
 }
+
+
 
 
