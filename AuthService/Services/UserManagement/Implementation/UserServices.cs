@@ -217,7 +217,8 @@ namespace AuthService.Services.UserManagement.Implementation
             new Claim(ClaimTypes.Name, user.UserName),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new Claim(JwtRegisteredClaimNames.Iss, _jwtConfig.ValidIssuer),
-            new Claim(JwtRegisteredClaimNames.Aud, _jwtConfig.ValidAudience)
+            new Claim(JwtRegisteredClaimNames.Aud, _jwtConfig.ValidAudience),
+            new Claim("token_type", "access")
         };
 
                 IList<string> userRoles = await _userManager.GetRolesAsync(user);

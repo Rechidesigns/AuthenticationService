@@ -15,11 +15,11 @@ COPY . .
 WORKDIR "/src/AuthService"
 RUN dotnet build "./AuthService.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
-FROM build AS publish
-ARG BUILD_CONFIGURATION=Release
+# FROM build AS publish
+# ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./AuthService.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
-COPY --from=publish /app/publish .
+COPY --from=build /app/publish .
 ENTRYPOINT ["dotnet", "AuthService.dll"]
