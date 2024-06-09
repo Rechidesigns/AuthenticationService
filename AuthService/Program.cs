@@ -14,7 +14,16 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 
+
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure Kestrel to use specific ports from appsettings.json
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    // Kestrel configuration
+    serverOptions.ListenAnyIP(5000); // Default port for Kestrel inside Docker container
+});
+
 
 // Add services to the container.
 builder.Services.AddControllers();
