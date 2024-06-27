@@ -1,4 +1,24 @@
 
+# services:
+#   authservice:
+#     image: authservice:latest
+#     build:
+#       context: .
+#       dockerfile: Dockerfile
+#     ports:
+#       - "8090:5000"
+#     environment:
+#       - ASPNETCORE_ENVIRONMENT=Development
+#       - ASPNETCORE_URLS=http://+:5000
+#       - ConnectionStrings__DefaultConnection=Server=rechiserver.database.windows.net,1433;Database=authdb;User Id=admin_rechi;Password=Qwerty123;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
+#     volumes:
+#       - sqlvolume:/var/log/authservice  # Example usage: storing logs
+
+# volumes:
+#   sqlvolume:  # Define the volume
+#     # Configuration options for the volume, such as driver and driver_opts if needed
+
+
 services:
   authservice:
     image: authservice:latest
@@ -10,10 +30,9 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:5000
-      - ConnectionStrings__DefaultConnection=Server=rechiserver.database.windows.net,1433;Database=authdb;User Id=admin_rechi;Password=Qwerty123;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
+      # The connection string is now stored in appsettings.json
     volumes:
-      - sqlvolume:/var/log/authservice  # Example usage: storing logs
+      - sqlvolume:/var/log/authservice
 
 volumes:
-  sqlvolume:  # Define the volume
-    # Configuration options for the volume, such as driver and driver_opts if needed
+  sqlvolume:
