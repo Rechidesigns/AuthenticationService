@@ -21,6 +21,9 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Load configuration from appsettings.json
+builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+
 // Configure Kestrel to use specific ports from appsettings.json
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
