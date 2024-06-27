@@ -68,7 +68,8 @@ namespace AuthService.Services.UserManagement.Implementation
                     return new RegisterResponse
                     {
                         Success = false,
-                        Message = "Email already exists."
+                        Message = "Email already exists.",
+                        IdentityResult = IdentityResult.Failed(new IdentityError { Description = "Email already exists." })
                     };
                 }
 
@@ -129,7 +130,6 @@ namespace AuthService.Services.UserManagement.Implementation
                 };
             }
         }
-
 
         public async Task<Result<LoginResponseDto>> Login(LoginDto model)
         {
