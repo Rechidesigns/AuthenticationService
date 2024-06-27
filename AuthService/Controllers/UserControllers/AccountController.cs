@@ -8,6 +8,8 @@ using AuthService.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using AuthService.Data.Auth;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
+using AuthService.Services.UserManagement.Implementation;
 
 namespace AuthService.Controllers.UserControllers
 {
@@ -17,12 +19,14 @@ namespace AuthService.Controllers.UserControllers
     {
         private readonly IUserService _userService;
         private readonly IMailSender _mailSender;
+        private readonly ILogger<UserService> _logger;
 
 
-        public AccountController(IUserService userService, IMailSender mailSender)
+        public AccountController(IUserService userService, IMailSender mailSender, ILogger<UserService> logger)
         {
             _userService = userService;
             _mailSender = mailSender;
+            _logger = logger;
         }
 
 
@@ -35,6 +39,12 @@ namespace AuthService.Controllers.UserControllers
             }
 
             var response = await _userService.RegisterAsync(model);
+
+            if (response == null)
+            {
+                _logger.LogError("RegisterAsync returned null for model: {Model}", model);
+                return StatusCode(500, "Internal server error.");
+            }
 
             if (response.Success)
             {
@@ -50,9 +60,10 @@ namespace AuthService.Controllers.UserControllers
             {
                 response.Success,
                 response.Message,
-                Errors = response.IdentityResult.Errors
+                Errors = response.IdentityResult?.Errors ?? new List<IdentityError> { new IdentityError { Description = "Unknown error" } }
             });
         }
+
 
         [HttpPost]
         [Route("login")]
