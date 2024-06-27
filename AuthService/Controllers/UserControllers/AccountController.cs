@@ -82,7 +82,7 @@ namespace AuthService.Controllers.UserControllers
         }
 
         [HttpPost]
-        [Route("refresh_token")]
+        [Route("refresh-token")]
         [AllowAnonymous]
         public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenNewRequestModel model)
         {
@@ -92,7 +92,7 @@ namespace AuthService.Controllers.UserControllers
             return Ok(response);
         }
 
-        [HttpPost("change_password/{email}")]
+        [HttpPost("change-password/{email}")]
         public async Task<IActionResult> ChangePassword([FromRoute] string email, [FromBody] ChangePassword model)
         {
 
