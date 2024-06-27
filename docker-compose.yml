@@ -1,3 +1,4 @@
+
 services:
   authservice:
     image: authservice:latest
@@ -9,19 +10,10 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:5000
-      - ConnectionStrings__DefaultConnection=Server=database;Database=AuthServiceDb;User Id=sa;Password=Alexwhite96#
-    depends_on:
-      - database
-
-  database:
-    image: mcr.microsoft.com/mssql/server
-    environment:
-      SA_PASSWORD: "Alexwhite96#"
-      ACCEPT_EULA: "Y"
-    ports:
-      - "1433:1433"
+      - ConnectionStrings__DefaultConnection=Server=rechiserver.database.windows.net,1433;Database=authdb;User Id=admin_rechi;Password=Qwerty123;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
     volumes:
-      - sqlvolume:/var/opt/mssql
+      - sqlvolume:/var/log/authservice  # Example usage: storing logs
 
 volumes:
-  sqlvolume:
+  sqlvolume:  # Define the volume
+    # Configuration options for the volume, such as driver and driver_opts if needed
