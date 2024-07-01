@@ -92,7 +92,9 @@ namespace AuthService.Controllers.UserControllers
             return Ok(response);
         }
 
-        [HttpPost("change-password/{email}")]
+        [HttpPost]
+        [Route("change-password/{email}")]
+        [Authorize]
         public async Task<IActionResult> ChangePassword([FromRoute] string email, [FromBody] ChangePassword model)
         {
 
